@@ -302,41 +302,66 @@ function handleFileSelect(e) {
 // ─── IMAGE COMPRESSION ────────────────────────────────────────────────────────
 function compressImage(dataURL, maxSize, quality) {
   return new Promise((resolve) => {
+    // Safety timeout — if image never loads, resolve with original after 5s
+    const timeout = setTimeout(() => {
+      console.warn('compressImage timeout, using original');
+      resolve(dataURL);
+    }, 5000);
+
     const img = new Image();
     img.onload = () => {
-      let { width, height } = img;
-      // Scale down if larger than maxSize on either dimension
-      if (width > maxSize || height > maxSize) {
-        if (width > height) {
-          height = Math.round(height * maxSize / width);
-          width = maxSize;
-        } else {
-          width = Math.round(width * maxSize / height);
-          height = maxSize;
+      clearTimeout(timeout);
+      try {
+        let { width, height } = img;
+        if (width > maxSize || height > maxSize) {
+          if (width > height) {
+            height = Math.round(height * maxSize / width);
+            width = maxSize;
+          } else {
+            width = Math.round(width * maxSize / height);
+            height = maxSize;
+          }
         }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressed = canvas.toDataURL('image/jpeg', quality);
+        console.log('Compressed from', Math.round(dataURL.length/1024), 'KB to', Math.round(compressed.length/1024), 'KB');
+        resolve(compressed);
+      } catch(e) {
+        console.warn('Compression failed:', e);
+        resolve(dataURL);
       }
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, width, height);
-      resolve(canvas.toDataURL('image/jpeg', quality));
     };
-    img.onerror = () => resolve(dataURL); // fallback: use original if compression fails
+    img.onerror = (e) => {
+      clearTimeout(timeout);
+      console.warn('Image load error:', e);
+      resolve(dataURL);
+    };
     img.src = dataURL;
   });
 }
 
 // ─── OCR ──────────────────────────────────────────────────────────────────────
 async function runOCR(dataURL) {
+  // Navigate first, then wait for screen transition to complete before touching DOM
   go('s-processing');
+  await delay(150);
+
   const preview = document.getElementById('scanPreview');
-  preview.innerHTML = `<img src="${dataURL}" alt="扫描图片">`;
-  document.getElementById('errorMsg').style.display = 'none';
+  if (preview) preview.innerHTML = `<img src="${dataURL}" alt="扫描图片">`;
+
+  const errEl2 = document.getElementById('errorMsg');
+  if (errEl2) errEl2.style.display = 'none';
+  const retryEl = document.getElementById('retryBtn');
+  if (retryEl) retryEl.style.display = 'none';
 
   const steps = ['st1','st2','st3','st4'];
   steps.forEach((id,i) => {
     const el = document.getElementById(id);
+    if (!el) return;
     el.className = 'step-row';
     el.querySelector('.step-icon').textContent = i+1;
   });
@@ -350,11 +375,8 @@ async function runOCR(dataURL) {
   try {
     setStep(1, 'active');
 
-    // Compress image before sending — phone photos are 3-5MB which is too large
-    // Resize to max 1200px and compress to JPEG 0.85 — still plenty for OCR
-    const compressedDataURL = await compressImage(dataURL, 1200, 0.85);
-    const base64 = compressedDataURL.split(',')[1];
-    console.log('Image compressed, base64 length:', base64.length);
+    // Extract base64 directly — simpler and more reliable
+    const base64 = dataURL.split(',')[1];
 
     await delay(300);
     setStep(1, 'done'); setStep(2, 'active');
