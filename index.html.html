@@ -226,7 +226,6 @@ html,body{height:100%;overflow:hidden;font-family:'Noto Sans SC',sans-serif;back
 
 <script>
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
-// Paste your Google Cloud Vision API key here after you get it:
 const GOOGLE_VISION_API_KEY = 'AIzaSyAlQi0CiHtnIwdEOqBTsdgMEM6NExHKCzM';
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
@@ -351,7 +350,6 @@ async function runOCR(dataURL) {
     }
 
     setStep(2, 'done'); setStep(3, 'active');
-    // Clean up text: remove spaces between Chinese chars, keep punctuation
     extractedText = cleanChineseText(extractedText);
     await delay(350);
     setStep(3, 'done'); setStep(4, 'active');
@@ -371,9 +369,6 @@ async function runOCR(dataURL) {
 }
 
 function cleanChineseText(rawText) {
-  // Step 1: Split into lines as OCR returns them
-  const lines = rawText.split(/\r?\n/);
-
   const chinesePunct = new Set(['。','，','？','！','、','；','：','…','—','「','」','『','』','（','）','·']);
 
   function isChineseChar(ch) {
@@ -384,38 +379,83 @@ function cleanChineseText(rawText) {
         || chinesePunct.has(ch);
   }
 
-  // Step 2: For each line, extract only Chinese chars
-  const cleanedLines = lines.map(line => {
-    return line.split('').filter(isChineseChar).join('');
-  }).filter(line => line.length > 0); // drop empty lines
+  // Step 1: Split raw OCR into lines, filter each to Chinese only
+  const lines = rawText.split(/
+?
+/).map(line =>
+    line.split('').filter(isChineseChar).join('')
+  ).filter(line => line.length > 0);
 
-  // Step 3: Detect paragraph breaks.
-  // A line that ends with sentence-ending punctuation (。！？) is a paragraph end.
-  // Short lines (< 5 chars) that are standalone are likely titles/headers — skip them
-  // unless they end with sentence punctuation (means they're a short sentence).
+  if (lines.length === 0) return '';
+
   const sentenceEnders = new Set(['。','！','？']);
-  const filtered = cleanedLines.filter(line => {
-    // Skip very short lines that don't end a sentence — likely page numbers, chapter labels, titles
-    if (line.length < 4 && !sentenceEnders.has(line[line.length - 1])) return false;
-    return true;
+
+  // Step 2: Separate title from body.
+  // Look through the first 3 lines for a title candidate.
+  // Title = a short line (2-8 chars) that does NOT end in sentence punctuation.
+  // If multiple candidates exist in the first 3 lines, pick the LONGEST one
+  // (e.g. "大海那边" beats "我阅读" — the actual title is usually longer than a label).
+  let titleLine = '';
+  let titleIdx = -1;
+
+  const candidates = lines.slice(0, 3).map((line, i) => ({ line, i })).filter(({ line }) =>
+    line.length >= 2 &&
+    line.length <= 8 &&
+    !sentenceEnders.has(line[line.length - 1])
+  );
+
+  if (candidates.length > 0) {
+    // Pick the longest candidate — titles are usually more descriptive than labels
+    candidates.sort((a, b) => b.line.length - a.line.length);
+    titleLine = candidates[0].line;
+    titleIdx = candidates[0].i;
+  }
+
+  // Remove ALL short non-sentence lines from the first 3 lines (labels, series names etc)
+  // keeping only the chosen title and body content
+  const shortPrefixLines = new Set(
+    lines.slice(0, 3)
+      .map((line, i) => ({ line, i }))
+      .filter(({ line }) => line.length <= 8 && !sentenceEnders.has(line[line.length - 1]))
+      .map(({ i }) => i)
+  );
+
+  let bodyLines = lines.filter((_, i) => !shortPrefixLines.has(i));
+
+  // Step 3: Filter out remaining short non-sentence lines from body
+  // (page numbers like 52, chapter labels like 第四课, series labels)
+  const filteredBody = bodyLines.filter(line => {
+    // Keep if ends with sentence punctuation — it's a real sentence even if short
+    if (sentenceEnders.has(line[line.length - 1])) return true;
+    // Keep if long enough to be body text
+    if (line.length >= 5) return true;
+    // Drop short non-sentence lines — these are labels, numbers, headers
+    return false;
   });
 
-  // Step 4: Group lines into paragraphs.
+  // Step 4: Group body lines into paragraphs.
   // A paragraph ends when a line ends with 。！？
-  // Then we separate paragraphs with \n\n for visual spacing.
   let paragraphs = [];
-  let currentPara = '';
-  for (const line of filtered) {
-    currentPara += line;
+  let current = '';
+  for (const line of filteredBody) {
+    current += line;
     if (sentenceEnders.has(line[line.length - 1])) {
-      paragraphs.push(currentPara);
-      currentPara = '';
+      paragraphs.push(current);
+      current = '';
     }
   }
-  if (currentPara.length > 0) paragraphs.push(currentPara);
+  if (current.length > 0) paragraphs.push(current);
 
-  // Join paragraphs with double newline so buildPassage can render spacing
-  return paragraphs.join('\n\n').trim();
+  // Step 5: Assemble final output
+  // Title gets its own line separated from passage by blank line
+  let result = '';
+  if (titleLine) result += titleLine + '
+
+';
+  result += paragraphs.join('
+
+');
+  return result.trim();
 }
 
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
