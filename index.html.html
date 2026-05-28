@@ -226,7 +226,7 @@ html,body{height:100%;overflow:hidden;font-family:'Noto Sans SC',sans-serif;back
 <script>
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
 // Paste your Google Cloud Vision API key here after you get it:
-const GOOGLE_VISION_API_KEY = 'YOUR_GOOGLE_VISION_API_KEY';
+const GOOGLE_VISION_API_KEY = 'AIzaSyAlQi0CiHtnIwdEOqBTsdgMEM6NExHKCzM';
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
 let passage = '';
@@ -322,7 +322,7 @@ async function runOCR(dataURL) {
 
     let extractedText = '';
 
-    if (GOOGLE_VISION_API_KEY && GOOGLE_VISION_API_KEY !== 'YOUR_GOOGLE_VISION_API_KEY') {
+    if (GOOGLE_VISION_API_KEY && GOOGLE_VISION_API_KEY !== 'AIzaSyAlQi0CiHtnIwdEOqBTsdgMEM6NExHKCzM') {
       // Real OCR via Google Cloud Vision
       const response = await fetch(
         `https://vision.googleapis.com/v1/images:annotate?key=${GOOGLE_VISION_API_KEY}`,
