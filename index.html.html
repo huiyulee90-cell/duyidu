@@ -322,7 +322,7 @@ async function runOCR(dataURL) {
 
     let extractedText = '';
 
-    if (GOOGLE_VISION_API_KEY && GOOGLE_VISION_API_KEY !== 'AIzaSyAlQi0CiHtnIwdEOqBTsdgMEM6NExHKCzM') {
+    if (GOOGLE_VISION_API_KEY && GOOGLE_VISION_API_KEY !== 'YOUR_GOOGLE_VISION_API_KEY') {
       // Real OCR via Google Cloud Vision
       const response = await fetch(
         `https://vision.googleapis.com/v1/images:annotate?key=${GOOGLE_VISION_API_KEY}`,
