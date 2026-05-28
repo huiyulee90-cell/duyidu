@@ -547,12 +547,8 @@ function cleanChineseText(rawText) {
   // Step 5: Assemble final output
   // Title gets its own line separated from passage by blank line
   let result = '';
-  if (titleLine) result += titleLine + '
-
-';
-  result += paragraphs.join('
-
-');
+  if (titleLine) result += titleLine + '\n\n';
+  result += paragraphs.join('\n\n');
   return result.trim();
 }
 
