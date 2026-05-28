@@ -87,6 +87,7 @@ html,body{height:100%;overflow:hidden;font-family:'Noto Sans SC',sans-serif;back
 .char{display:inline-block;border-radius:6px;padding:1px 3px;transition:background 0.06s,color 0.06s;cursor:pointer;}
 .char.highlighted{background:var(--purple-light);color:var(--purple-mid);font-weight:700;}
 .char.read{color:var(--text-hint);}
+.char.para-break{display:block;height:1.2em;}
 .player-panel{background:var(--surface);border-top:1px solid var(--border);padding:16px 20px 32px;flex-shrink:0;}
 .progress-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
 .pct-label{font-size:12px;color:var(--text-hint);min-width:32px;text-align:right;}
@@ -369,21 +370,52 @@ async function runOCR(dataURL) {
   }
 }
 
-function cleanChineseText(text) {
-  // Keep ONLY CJK characters and Chinese punctuation.
-  // Strips ALL Latin letters including tone-marked pinyin (e.g. ā á ǎ à ē é ě etc),
-  // numbers, spaces, English punctuation — everything non-Chinese.
+function cleanChineseText(rawText) {
+  // Step 1: Split into lines as OCR returns them
+  const lines = rawText.split(/\r?\n/);
+
   const chinesePunct = new Set(['。','，','？','！','、','；','：','…','—','「','」','『','』','（','）','·']);
-  const chineseOnly = text.split('').filter(ch => {
+
+  function isChineseChar(ch) {
     const code = ch.codePointAt(0);
-    if (code >= 0x4E00 && code <= 0x9FFF) return true;   // CJK Unified Ideographs
-    if (code >= 0x3400 && code <= 0x4DBF) return true;   // CJK Extension A
-    if (code >= 0x20000 && code <= 0x2A6DF) return true; // CJK Extension B
-    if (chinesePunct.has(ch)) return true;
-    // Drop everything else: Latin a-z, accented pinyin, numbers, symbols
-    return false;
-  }).join('');
-  return chineseOnly.trim();
+    return (code >= 0x4E00 && code <= 0x9FFF)
+        || (code >= 0x3400 && code <= 0x4DBF)
+        || (code >= 0x20000 && code <= 0x2A6DF)
+        || chinesePunct.has(ch);
+  }
+
+  // Step 2: For each line, extract only Chinese chars
+  const cleanedLines = lines.map(line => {
+    return line.split('').filter(isChineseChar).join('');
+  }).filter(line => line.length > 0); // drop empty lines
+
+  // Step 3: Detect paragraph breaks.
+  // A line that ends with sentence-ending punctuation (。！？) is a paragraph end.
+  // Short lines (< 5 chars) that are standalone are likely titles/headers — skip them
+  // unless they end with sentence punctuation (means they're a short sentence).
+  const sentenceEnders = new Set(['。','！','？']);
+  const filtered = cleanedLines.filter(line => {
+    // Skip very short lines that don't end a sentence — likely page numbers, chapter labels, titles
+    if (line.length < 4 && !sentenceEnders.has(line[line.length - 1])) return false;
+    return true;
+  });
+
+  // Step 4: Group lines into paragraphs.
+  // A paragraph ends when a line ends with 。！？
+  // Then we separate paragraphs with \n\n for visual spacing.
+  let paragraphs = [];
+  let currentPara = '';
+  for (const line of filtered) {
+    currentPara += line;
+    if (sentenceEnders.has(line[line.length - 1])) {
+      paragraphs.push(currentPara);
+      currentPara = '';
+    }
+  }
+  if (currentPara.length > 0) paragraphs.push(currentPara);
+
+  // Join paragraphs with double newline so buildPassage can render spacing
+  return paragraphs.join('\n\n').trim();
 }
 
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -401,7 +433,18 @@ function buildPassage(text) {
   const el = document.getElementById('chineseText');
   el.innerHTML = '';
   text.split('').forEach((ch, i) => {
-    if (ch === '\n') { el.appendChild(document.createElement('br')); return; }
+    if (ch === '\n') {
+      // Single newline = line break within paragraph
+      el.appendChild(document.createElement('br'));
+      // Add a spacer span so the highlight loop has something to land on
+      const spacer = document.createElement('span');
+      spacer.id = 'c' + i;
+      spacer.className = 'char para-break';
+      spacer.textContent = '';
+      el.appendChild(spacer);
+      chars.push({ ch, el: spacer, idx: i });
+      return;
+    }
     const span = document.createElement('span');
     span.id = 'c' + i;
     span.className = 'char';
@@ -488,27 +531,42 @@ function startSpeaking(fromCharIdx) {
 }
 
 function estimateDuration(text, rate) {
-  // Base: ~170ms per Chinese char, ~80ms per punctuation at rate=1
   let ms = 0;
   for (const ch of text) {
-    if (PUNCT.has(ch)) {
-      ms += ['。','？','！'].includes(ch) ? 500 : 200;
-    } else {
-      ms += 170;
-    }
+    if (ch === '\n') ms += 900;
+    else if (['。','！','？'].includes(ch)) ms += 600;
+    else if (['，','；','：'].includes(ch)) ms += 320;
+    else if (['、'].includes(ch)) ms += 200;
+    else if (['…','—'].includes(ch)) ms += 400;
+    else ms += 175;
   }
   return ms / rate;
 }
 
 function buildCharTimings(text, rate) {
-  // Returns array of {startMs, endMs} for each character
+  // Returns array of {startMs, endMs} for each character.
+  // Pauses are tuned to make reading feel natural and not robotic:
+  //   。！？  — full stop, long breath pause
+  //   ，；：  — comma pause, shorter
+  //   、      — list comma, brief
+  //   \n      — paragraph break, longest pause
   const timings = [];
   let cursor = 0;
   for (const ch of text) {
     let dur;
-    if (['。','？','！'].includes(ch)) dur = 500;
-    else if (PUNCT.has(ch)) dur = 200;
-    else dur = 170;
+    if (ch === '\n') {
+      dur = 900;  // paragraph break — long pause, no highlight
+    } else if (['。','！','？'].includes(ch)) {
+      dur = 600;  // sentence end — full breath
+    } else if (['，','；','：'].includes(ch)) {
+      dur = 320;  // clause pause
+    } else if (['、'].includes(ch)) {
+      dur = 200;  // list comma
+    } else if (['…','—'].includes(ch)) {
+      dur = 400;  // ellipsis / dash
+    } else {
+      dur = 175;  // regular character
+    }
     dur = dur / rate;
     timings.push({ startMs: cursor, endMs: cursor + dur });
     cursor += dur;
