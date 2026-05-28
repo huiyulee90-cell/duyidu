@@ -480,9 +480,7 @@ function cleanChineseText(rawText) {
   }
 
   // Step 1: Split raw OCR into lines, filter each to Chinese only
-  const lines = rawText.split(/
-?
-/).map(line =>
+  const lines = rawText.split(/\r?\n/).map(line =>
     line.split('').filter(isChineseChar).join('')
   ).filter(line => line.length > 0);
 
