@@ -370,8 +370,19 @@ async function runOCR(dataURL) {
 }
 
 function cleanChineseText(text) {
-  // Remove line breaks within sentences, collapse spaces
-  return text.replace(/\r\n/g,'\n').replace(/[ \t]+/g,'').trim();
+  // Keep only Chinese characters and Chinese punctuation, discard pinyin/latin/numbers/symbols
+  const chineseOnly = text.split('').filter(ch => {
+    const code = ch.codePointAt(0);
+    const isCJK = (code >= 0x4E00 && code <= 0x9FFF)   // CJK Unified Ideographs (most common Chinese chars)
+               || (code >= 0x3400 && code <= 0x4DBF)   // CJK Extension A
+               || (code >= 0x20000 && code <= 0x2A6DF); // CJK Extension B
+    const isPunct = ['。','，','？','！','、','；','：','…','—','「','」','『','』','（','）'].includes(ch);
+    return isCJK || isPunct;
+  }).join('');
+
+  // Insert a pause marker (comma) between lines that had line breaks originally
+  // so reading doesn't run sentences together
+  return chineseOnly.trim();
 }
 
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
