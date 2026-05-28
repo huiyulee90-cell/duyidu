@@ -346,100 +346,125 @@ function compressImage(dataURL, maxSize, quality) {
 
 // ─── OCR ──────────────────────────────────────────────────────────────────────
 async function runOCR(dataURL) {
-  // Navigate first, then wait for screen transition to complete before touching DOM
+  // Step 1 — switch to processing screen and reset UI
   go('s-processing');
-  await delay(150);
+  await delay(200); // wait for DOM to be fully visible
 
-  const preview = document.getElementById('scanPreview');
-  if (preview) preview.innerHTML = `<img src="${dataURL}" alt="扫描图片">`;
+  document.getElementById('scanPreview').innerHTML = '<img src="' + dataURL + '" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">';
+  document.getElementById('errorMsg').style.display = 'none';
+  document.getElementById('retryBtn').style.display = 'none';
+  document.getElementById('procSpinner').style.display = 'block';
 
-  const errEl2 = document.getElementById('errorMsg');
-  if (errEl2) errEl2.style.display = 'none';
-  const retryEl = document.getElementById('retryBtn');
-  if (retryEl) retryEl.style.display = 'none';
-
-  const steps = ['st1','st2','st3','st4'];
-  steps.forEach((id,i) => {
+  ['st1','st2','st3','st4'].forEach((id, i) => {
     const el = document.getElementById(id);
-    if (!el) return;
     el.className = 'step-row';
-    el.querySelector('.step-icon').textContent = i+1;
+    el.querySelector('.step-icon').textContent = String(i + 1);
   });
 
   function setStep(n, state) {
-    const el = document.getElementById('st'+n);
+    const el = document.getElementById('st' + n);
     el.className = 'step-row ' + state;
     if (state === 'done') el.querySelector('.step-icon').textContent = '✓';
   }
 
+  function showError(msg) {
+    document.getElementById('procSpinner').style.display = 'none';
+    document.getElementById('errorMsg').style.display = 'block';
+    document.getElementById('errorMsg').textContent = msg;
+    document.getElementById('retryBtn').style.display = 'block';
+  }
+
   try {
+    // Step 2 — compress image to max 1200px before sending
     setStep(1, 'active');
+    const compressedURL = await new Promise((resolve) => {
+      const img = new Image();
+      const timer = setTimeout(() => resolve(dataURL), 4000);
+      img.onload = () => {
+        clearTimeout(timer);
+        const MAX = 1200;
+        let w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+          else { w = Math.round(w * MAX / h); h = MAX; }
+        }
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(c.toDataURL('image/jpeg', 0.82));
+      };
+      img.onerror = () => { clearTimeout(timer); resolve(dataURL); };
+      img.src = dataURL;
+    });
 
-    // Extract base64 directly — simpler and more reliable
-    const base64 = dataURL.split(',')[1];
-
-    await delay(300);
+    const base64 = compressedURL.split(',')[1];
     setStep(1, 'done'); setStep(2, 'active');
 
-    let extractedText = '';
+    // Step 3 — call Google Vision with a 15 second timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    if (GOOGLE_VISION_API_KEY && GOOGLE_VISION_API_KEY !== 'YOUR_GOOGLE_VISION_API_KEY') {
-      // Real OCR via Google Cloud Vision
-      let response, data;
-      try {
-        response = await fetch(
-          `https://vision.googleapis.com/v1/images:annotate?key=${GOOGLE_VISION_API_KEY}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              requests: [{
-                image: { content: base64 },
-                features: [{ type: 'TEXT_DETECTION', maxResults: 1 }],
-                imageContext: { languageHints: ['zh-Hans', 'zh-Hant'] }
-              }]
-            })
-          }
-        );
-        data = await response.json();
-        console.log('Vision API response status:', response.status);
-        console.log('Vision API data:', JSON.stringify(data).slice(0, 300));
-      } catch(fetchErr) {
-        throw new Error('网络错误，无法连接到OCR服务。请检查网络连接。 (' + fetchErr.message + ')');
-      }
-
-      if (data.error) throw new Error('API错误: ' + data.error.message + ' (code: ' + data.error.code + ')');
-      if (!data.responses || !data.responses[0]) throw new Error('API返回空响应。请重试。');
-      const annotation = data.responses[0].textAnnotations;
-      if (!annotation || annotation.length === 0) throw new Error('未能识别到文字。请确保图片清晰、光线充足，且页面包含中文字。');
-      extractedText = annotation[0].description.trim();
-      console.log('OCR raw text:', extractedText.slice(0, 200));
-    } else {
-      // Demo fallback when no API key is set
-      await delay(800);
-      extractedText = '小明每天早上都会读书。他非常努力，老师很喜欢他。同学们也很喜欢和他一起玩。';
+    let response;
+    try {
+      response = await fetch(
+        'https://vision.googleapis.com/v1/images:annotate?key=' + GOOGLE_VISION_API_KEY,
+        {
+          method: 'POST',
+          signal: controller.signal,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            requests: [{
+              image: { content: base64 },
+              features: [{ type: 'TEXT_DETECTION', maxResults: 1 }],
+              imageContext: { languageHints: ['zh-Hans', 'zh-Hant'] }
+            }]
+          })
+        }
+      );
+      clearTimeout(timeoutId);
+    } catch(fetchErr) {
+      clearTimeout(timeoutId);
+      const reason = fetchErr.name === 'AbortError' ? '请求超时（15秒）。请检查网络或减小图片。' : '网络错误: ' + fetchErr.message;
+      showError(reason);
+      return;
     }
 
+    if (!response.ok) {
+      showError('API HTTP错误: ' + response.status + ' ' + response.statusText);
+      return;
+    }
+
+    const data = await response.json();
+    if (data.error) { showError('API错误: ' + data.error.message + ' (code ' + data.error.code + ')'); return; }
+    if (!data.responses || !data.responses[0]) { showError('API返回空响应，请重试。'); return; }
+
+    const annotation = data.responses[0].textAnnotations;
+    if (!annotation || annotation.length === 0) { showError('未能识别到文字。请确保光线充足、图片清晰。'); return; }
+
+    let extractedText = annotation[0].description.trim();
     setStep(2, 'done'); setStep(3, 'active');
+
+    // Step 4 — clean text
     extractedText = cleanChineseText(extractedText);
-    await delay(350);
-    setStep(3, 'done'); setStep(4, 'active');
-    await delay(350);
-    setStep(4, 'done');
     await delay(300);
 
+    if (!extractedText || extractedText.length === 0) {
+      showError('识别到文字，但没有找到中文字符。请拍摄包含中文的页面。');
+      return;
+    }
+
+    setStep(3, 'done'); setStep(4, 'active');
+    await delay(300);
+    setStep(4, 'done');
+    await delay(250);
+
     go('s-read');
+    await delay(100);
     buildPassage(extractedText);
 
   } catch(err) {
-    document.getElementById('procSpinner').style.display = 'none';
-    const errEl = document.getElementById('errorMsg');
-    errEl.style.display = 'block';
-    const msg = err.message || '未知错误';
-    // Show English too so we can debug
-    errEl.textContent = '识别失败：' + msg;
-    console.error('OCR error:', err);
-    document.getElementById('retryBtn').style.display = 'block';
+    showError('未知错误: ' + (err.message || String(err)));
+    console.error('runOCR error:', err);
   }
 }
 
