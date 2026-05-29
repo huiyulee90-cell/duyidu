@@ -7,104 +7,136 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="读一读">
 <meta name="theme-color" content="#7F77DD">
-<title>读一读 · Dú Yī Dú</title>
+<title>读一读</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
 :root {
-  --purple:#7F77DD; --purple-light:#EEEDFE; --purple-mid:#534AB7;
-  --green:#1D9E75; --green-light:#E1F5EE;
-  --amber-light:#FAEEDA; --amber:#854F0B;
-  --bg:#FAFAF9; --surface:#FFFFFF;
-  --border:rgba(0,0,0,0.1); --text:#1a1a1a;
-  --text-muted:#6b6b6b; --text-hint:#9b9b9b;
-  --radius:16px; --radius-sm:10px;
+  --purple: #7F77DD;
+  --purple-light: #EEEDFE;
+  --purple-mid: #534AB7;
+  --green-light: #E1F5EE;
+  --green: #1D9E75;
+  --bg: #FAFAF9;
+  --surface: #FFFFFF;
+  --border: rgba(0,0,0,0.1);
+  --text: #1a1a1a;
+  --muted: #6b6b6b;
+  --hint: #9b9b9b;
+  --r: 16px;
 }
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;overflow:hidden;font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);}
-#app{height:100%;max-width:430px;margin:0 auto;position:relative;overflow:hidden;background:var(--bg);}
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transform:translateX(30px);transition:opacity 0.22s ease,transform 0.22s ease;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-.screen.active{opacity:1;pointer-events:all;transform:translateX(0);}
-.screen.exit{opacity:0;transform:translateX(-30px);}
-.app-bar{display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;position:sticky;top:0;z-index:10;}
-.app-bar-title{font-size:17px;font-weight:500;color:var(--text);}
-.back-btn{background:none;border:none;cursor:pointer;color:var(--purple);font-size:22px;line-height:1;display:flex;align-items:center;}
-/* HOME */
-.home-body{flex:1;display:flex;flex-direction:column;padding:0 20px 40px;}
-.hero{text-align:center;padding:40px 20px 28px;}
-.hero-icon{width:80px;height:80px;background:var(--purple-light);border-radius:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:40px;}
-.hero h1{font-size:24px;font-weight:700;color:var(--text);margin-bottom:8px;line-height:1.3;}
-.hero p{font-size:14px;color:var(--text-muted);line-height:1.6;}
-.primary-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:18px;background:var(--purple);color:white;border:none;border-radius:var(--radius);font-size:17px;font-weight:500;font-family:'Noto Sans SC',sans-serif;cursor:pointer;transition:transform 0.1s,opacity 0.1s;}
-.primary-btn:active{transform:scale(0.97);opacity:0.9;}
-.primary-btn svg{width:22px;height:22px;fill:none;stroke:white;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-.divider{display:flex;align-items:center;gap:12px;margin:20px 0;}
-.divider-line{flex:1;height:1px;background:var(--border);}
-.divider span{font-size:13px;color:var(--text-hint);}
-.secondary-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);font-size:16px;font-family:'Noto Sans SC',sans-serif;cursor:pointer;transition:transform 0.1s,background 0.1s;}
-.secondary-btn:active{transform:scale(0.97);background:var(--bg);}
-.secondary-btn svg{width:20px;height:20px;fill:none;stroke:var(--text-muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-.tip-card{margin-top:24px;background:var(--purple-light);border-radius:var(--radius-sm);padding:14px 16px;font-size:13px;color:var(--purple-mid);line-height:1.6;}
-.tip-card strong{font-weight:500;display:block;margin-bottom:4px;}
-/* CAMERA */
-.camera-viewport{flex:1;background:#0d0d1a;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:300px;}
-.camera-viewport video{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
-.camera-overlay{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:14px;pointer-events:none;}
-.camera-hint-text{color:rgba(255,255,255,0.8);font-size:13px;}
-.viewfinder{width:240px;height:150px;border:2px solid rgba(255,255,255,0.5);border-radius:8px;position:relative;}
-.vf-corner{position:absolute;width:20px;height:20px;}
-.vf-corner.tl{top:-2px;left:-2px;border-top:3px solid white;border-left:3px solid white;border-radius:4px 0 0 0;}
-.vf-corner.tr{top:-2px;right:-2px;border-top:3px solid white;border-right:3px solid white;border-radius:0 4px 0 0;}
-.vf-corner.bl{bottom:-2px;left:-2px;border-bottom:3px solid white;border-left:3px solid white;border-radius:0 0 0 4px;}
-.vf-corner.br{bottom:-2px;right:-2px;border-bottom:3px solid white;border-right:3px solid white;border-radius:0 0 4px 0;}
-.camera-controls{background:#0d0d1a;padding:24px 32px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.cam-side{width:52px;}
-.shutter-btn{width:72px;height:72px;border-radius:50%;background:white;border:5px solid rgba(255,255,255,0.35);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform 0.1s;}
-.shutter-btn:active{transform:scale(0.93);}
-.shutter-inner{width:56px;height:56px;background:white;border-radius:50%;border:2px solid rgba(0,0,0,0.12);}
-#fileInput{display:none;}
-.gallery-btn{width:52px;height:52px;border-radius:10px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:white;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-direction:column;gap:2px;}
-.gallery-btn svg{width:20px;height:20px;fill:none;stroke:white;stroke-width:2;stroke-linecap:round;}
-.gallery-btn span{font-size:10px;color:rgba(255,255,255,0.7);}
-/* PROCESSING */
-.processing-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;gap:28px;}
-.scan-preview{width:120px;height:80px;background:var(--purple-light);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:40px;overflow:hidden;}
-.scan-preview img{width:100%;height:100%;object-fit:cover;border-radius:var(--radius-sm);}
-.spinner-ring{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin 0.7s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.step-list{width:100%;display:flex;flex-direction:column;gap:12px;}
-.step-row{display:flex;align-items:center;gap:14px;font-size:15px;color:var(--text-hint);transition:color 0.3s;}
-.step-row.done{color:var(--text);}
-.step-row.active{color:var(--purple);font-weight:500;}
-.step-icon{width:32px;height:32px;border-radius:50%;background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;transition:all 0.3s;}
-.step-row.done .step-icon{background:var(--green-light);border-color:var(--green);}
-.step-row.active .step-icon{background:var(--purple-light);border-color:var(--purple);}
-.error-msg{color:#A32D2D;background:#FCEBEB;border-radius:var(--radius-sm);padding:14px 16px;font-size:14px;line-height:1.6;text-align:center;display:none;}
-/* READ */
-.read-body{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-.passage-wrap{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 20px 12px;}
-.passage-meta{font-size:11px;color:var(--text-hint);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:14px;}
-.chinese-text{font-size:26px;line-height:2.5;color:var(--text);display:flex;flex-wrap:wrap;align-items:baseline;}
-.char{display:inline-block;border-radius:6px;padding:1px 3px;transition:background 0.06s,color 0.06s;cursor:pointer;}
-.char.highlighted{background:var(--purple-light);color:var(--purple-mid);font-weight:700;}
-.char.read{color:var(--text-hint);}
-.char.para-break{display:block;height:1.2em;}
-.player-panel{background:var(--surface);border-top:1px solid var(--border);padding:16px 20px 32px;flex-shrink:0;}
-.progress-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
-.pct-label{font-size:12px;color:var(--text-hint);min-width:32px;text-align:right;}
-.progress-track{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
-.progress-fill{height:100%;background:var(--purple);border-radius:2px;width:0%;transition:width 0.1s;}
-.player-controls{display:flex;align-items:center;justify-content:space-between;}
-.ctrl-btn{background:none;border:none;cursor:pointer;color:var(--text-muted);padding:8px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background 0.15s;}
-.ctrl-btn:active{background:var(--bg);}
-.ctrl-btn svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-.play-pause-btn{width:56px;height:56px;border-radius:50%;background:var(--purple);color:white;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform 0.1s;box-shadow:0 4px 16px rgba(127,119,221,0.35);}
-.play-pause-btn:active{transform:scale(0.94);}
-.play-pause-btn svg{width:24px;height:24px;fill:white;stroke:none;}
-.speed-chips{display:flex;gap:8px;margin-top:16px;justify-content:center;flex-wrap:wrap;}
-.speed-chip{font-size:13px;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg);color:var(--text-muted);cursor:pointer;font-family:'Noto Sans SC',sans-serif;transition:all 0.15s;}
-.speed-chip.active{background:var(--purple-light);color:var(--purple-mid);border-color:rgba(127,119,221,0.4);font-weight:500;}
-.tts-warning{margin:0 20px 12px;padding:12px 14px;background:var(--amber-light);border-radius:var(--radius-sm);font-size:13px;color:var(--amber);line-height:1.5;display:none;}
-::-webkit-scrollbar{display:none;}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; font-family: sans-serif; background: var(--bg); }
+#app { height: 100%; max-width: 430px; margin: 0 auto; position: relative; overflow: hidden; }
+
+/* Screens */
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none; transform: translateX(24px);
+  transition: opacity 0.2s, transform 0.2s; overflow-y: auto; }
+.screen.active { opacity: 1; pointer-events: all; transform: translateX(0); }
+
+/* App bar */
+.bar { display: flex; align-items: center; gap: 12px; padding: 16px 20px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  flex-shrink: 0; position: sticky; top: 0; z-index: 10; }
+.bar-title { font-size: 17px; font-weight: 500; }
+.back { background: none; border: none; cursor: pointer; color: var(--purple);
+  display: flex; align-items: center; padding: 0; }
+.back svg { width: 22px; height: 22px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Home */
+.home-body { flex: 1; display: flex; flex-direction: column; padding: 0 20px 40px; }
+.hero { text-align: center; padding: 40px 0 28px; }
+.hero-icon { width: 80px; height: 80px; background: var(--purple-light); border-radius: 22px;
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 40px; }
+.hero h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; line-height: 1.3; }
+.hero p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+.btn-primary { display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 18px; background: var(--purple); color: white; border: none;
+  border-radius: var(--r); font-size: 17px; font-weight: 500; cursor: pointer; }
+.btn-primary svg { width: 22px; height: 22px; fill: none; stroke: white;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.btn-primary:active { opacity: 0.85; }
+.divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+.divider-line { flex: 1; height: 1px; background: var(--border); }
+.divider span { font-size: 13px; color: var(--hint); }
+.btn-secondary { display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 16px; background: var(--surface); color: var(--text);
+  border: 1px solid var(--border); border-radius: var(--r); font-size: 16px; cursor: pointer; }
+.btn-secondary svg { width: 20px; height: 20px; fill: none; stroke: var(--muted);
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.btn-secondary:active { background: var(--bg); }
+.tip { margin-top: 24px; background: var(--purple-light); border-radius: 10px;
+  padding: 14px 16px; font-size: 13px; color: var(--purple-mid); line-height: 1.6; }
+.tip strong { display: block; margin-bottom: 4px; }
+
+/* Processing */
+.proc-body { flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 40px 32px; gap: 24px; }
+.preview-img { width: 120px; height: 80px; background: var(--purple-light);
+  border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 36px; }
+.preview-img img { width: 100%; height: 100%; object-fit: cover; }
+.spinner { width: 44px; height: 44px; border: 3px solid var(--border);
+  border-top-color: var(--purple); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.steps { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+.step { display: flex; align-items: center; gap: 14px; font-size: 15px; color: var(--hint); }
+.step.active { color: var(--purple); font-weight: 500; }
+.step.done { color: var(--text); }
+.step-icon { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.step.active .step-icon { border-color: var(--purple); background: var(--purple-light); color: var(--purple); }
+.step.done .step-icon { border-color: var(--green); background: var(--green-light); color: var(--green); }
+.err-box { background: #FCEBEB; color: #A32D2D; border-radius: 10px;
+  padding: 14px 16px; font-size: 14px; line-height: 1.6; display: none; text-align: center; width: 100%; }
+.btn-retry { display: none; padding: 12px 28px; background: var(--purple); color: white;
+  border: none; border-radius: 10px; font-size: 15px; cursor: pointer; margin-top: 4px; }
+
+/* Read */
+.read-body { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.passage-wrap { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px; }
+.passage-meta { font-size: 11px; color: var(--hint); text-transform: uppercase;
+  letter-spacing: 0.8px; margin-bottom: 16px; }
+
+/* Title line */
+.passage-title { font-size: 22px; font-weight: 700; color: var(--text);
+  margin-bottom: 20px; text-align: center; line-height: 1.6; }
+.passage-title .char { cursor: pointer; border-radius: 4px; padding: 1px 2px; }
+
+/* Body text */
+.chinese-text { font-size: 22px; line-height: 2.4; color: var(--text); }
+.para { margin-bottom: 1.2em; display: flex; flex-wrap: wrap; }
+.para:last-child { margin-bottom: 0; }
+.char { display: inline; border-radius: 4px; padding: 1px 2px;
+  transition: background 0.06s, color 0.06s; cursor: pointer; }
+.char.hl { background: var(--purple-light); color: var(--purple-mid); font-weight: 700; }
+.char.read { color: var(--hint); }
+
+/* Player */
+.player { background: var(--surface); border-top: 1px solid var(--border);
+  padding: 16px 20px 32px; flex-shrink: 0; }
+.progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.pct { font-size: 12px; color: var(--hint); min-width: 32px; text-align: right; }
+.track { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.fill { height: 100%; background: var(--purple); border-radius: 2px; width: 0%; transition: width 0.1s; }
+.controls { display: flex; align-items: center; justify-content: space-between; }
+.ctrl { background: none; border: none; cursor: pointer; color: var(--muted);
+  padding: 8px; border-radius: 50%; display: flex; }
+.ctrl svg { width: 24px; height: 24px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ctrl:active { background: var(--bg); }
+.play-btn { width: 56px; height: 56px; border-radius: 50%; background: var(--purple);
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 14px rgba(127,119,221,0.4); }
+.play-btn svg { width: 22px; height: 22px; fill: white; }
+.play-btn:active { opacity: 0.9; }
+.speeds { display: flex; gap: 8px; margin-top: 14px; justify-content: center; flex-wrap: wrap; }
+.spd { font-size: 13px; padding: 6px 14px; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--bg); color: var(--muted); cursor: pointer; }
+.spd.on { background: var(--purple-light); color: var(--purple-mid);
+  border-color: rgba(127,119,221,0.4); font-weight: 500; }
+.tts-warn { margin: 0 20px 12px; padding: 12px; background: #FAEEDA; border-radius: 10px;
+  font-size: 13px; color: #854F0B; display: none; line-height: 1.5; }
+::-webkit-scrollbar { display: none; }
 </style>
 </head>
 <body>
@@ -112,721 +144,504 @@ html,body{height:100%;overflow:hidden;font-family:'Noto Sans SC',sans-serif;back
 
 <!-- HOME -->
 <div class="screen active" id="s-home">
-  <div class="app-bar"><span class="app-bar-title">读一读 · Dú Yī Dú</span></div>
+  <div class="bar"><span class="bar-title">读一读 · Dú Yī Dú</span></div>
   <div class="home-body">
     <div class="hero">
       <div class="hero-icon">📖</div>
       <h1>扫描课文，<br>一起来读！</h1>
-      <p>拍一张课文或功课的照片<br>App 会帮你朗读，每个字同步高亮。</p>
+      <p>拍一张课文或功课的照片<br>App 帮你朗读，每个字同步高亮。</p>
     </div>
-    <!-- Camera button: uses native capture on mobile, much more reliable than getUserMedia -->
-    <button class="primary-btn" onclick="document.getElementById('cameraInput').click()">
+    <button class="btn-primary" onclick="document.getElementById('inp-cam').click()">
       <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
       拍照扫描
     </button>
-    <!-- capture="environment" opens rear camera directly on Android and iOS -->
-    <input type="file" id="cameraInput" accept="image/*" capture="environment" onchange="handleFileSelect(event)" style="display:none">
-
+    <input id="inp-cam" type="file" accept="image/*" capture="environment" style="display:none" onchange="onFileChosen(event)">
     <div class="divider"><div class="divider-line"></div><span>或</span><div class="divider-line"></div></div>
-
-    <button class="secondary-btn" onclick="document.getElementById('fileInput').click()">
+    <button class="btn-secondary" onclick="document.getElementById('inp-gallery').click()">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
       从相册选择
     </button>
-    <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)" style="display:none">
-    <div class="tip-card">
+    <input id="inp-gallery" type="file" accept="image/*" style="display:none" onchange="onFileChosen(event)">
+    <div class="tip">
       <strong>💡 怎么用？</strong>
-      对准课本或功课的中文段落拍照，App 会朗读每一个字，同步高亮显示，帮助跟读练习。
+      对准课本或功课拍照，App 会朗读每一个字，同步高亮显示，帮助跟读练习。
     </div>
-  </div>
-</div>
-
-<!-- CAMERA -->
-<div class="screen" id="s-camera">
-  <div class="camera-viewport" id="cameraViewport">
-    <video id="videoEl" autoplay playsinline muted></video>
-    <div class="camera-overlay">
-      <div class="camera-hint-text">对准中文课文</div>
-      <div class="viewfinder">
-        <div class="vf-corner tl"></div><div class="vf-corner tr"></div>
-        <div class="vf-corner bl"></div><div class="vf-corner br"></div>
-      </div>
-      <div class="camera-hint-text" style="font-size:12px;opacity:0.7;">保持稳定，光线要充足</div>
-    </div>
-    <canvas id="captureCanvas" style="display:none;"></canvas>
-  </div>
-  <div class="camera-controls">
-    <button class="back-btn cam-side" style="color:white;" onclick="stopCamera();go('s-home')">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
-    <button class="shutter-btn" onclick="capturePhoto()">
-      <div class="shutter-inner"></div>
-    </button>
-    <label class="gallery-btn cam-side" for="fileInput">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-      <span>相册</span>
-    </label>
   </div>
 </div>
 
 <!-- PROCESSING -->
-<div class="screen" id="s-processing">
-  <div class="app-bar"><span class="app-bar-title">识别中…</span></div>
-  <div class="processing-body">
-    <div class="scan-preview" id="scanPreview">📄</div>
-    <div class="spinner-ring" id="procSpinner"></div>
-    <div class="step-list">
-      <div class="step-row" id="st1"><div class="step-icon">1</div><span>上传图片</span></div>
-      <div class="step-row" id="st2"><div class="step-icon">2</div><span>OCR 识别文字</span></div>
-      <div class="step-row" id="st3"><div class="step-icon">3</div><span>整理段落</span></div>
-      <div class="step-row" id="st4"><div class="step-icon">4</div><span>准备朗读</span></div>
+<div class="screen" id="s-proc">
+  <div class="bar"><span class="bar-title">识别中…</span></div>
+  <div class="proc-body">
+    <div class="preview-img" id="preview">📄</div>
+    <div class="spinner" id="spinner"></div>
+    <div class="steps">
+      <div class="step" id="s1"><div class="step-icon">1</div><span>压缩图片</span></div>
+      <div class="step" id="s2"><div class="step-icon">2</div><span>OCR 识别文字</span></div>
+      <div class="step" id="s3"><div class="step-icon">3</div><span>整理段落</span></div>
+      <div class="step" id="s4"><div class="step-icon">4</div><span>准备朗读</span></div>
     </div>
-    <div class="error-msg" id="errorMsg"></div>
-    <button id="retryBtn" onclick="go('s-home')" style="display:none;margin-top:16px;padding:12px 24px;background:var(--purple);color:white;border:none;border-radius:var(--radius);font-size:15px;cursor:pointer;font-family:'Noto Sans SC',sans-serif;">← 重试</button>
+    <div class="err-box" id="err-box"></div>
+    <button class="btn-retry" id="btn-retry" onclick="goTo('s-home')">← 重试</button>
   </div>
 </div>
 
-<!-- READ ALONG -->
+<!-- READ -->
 <div class="screen" id="s-read">
-  <div class="app-bar">
-    <button class="back-btn" onclick="stopAll();go('s-home')">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  <div class="bar">
+    <button class="back" onclick="stopAll();goTo('s-home')">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <span class="app-bar-title">跟读练习</span>
+    <span class="bar-title">跟读练习</span>
   </div>
   <div class="read-body">
     <div class="passage-wrap">
-      <div class="passage-meta">已扫描 · 点击任何一个字可跳转</div>
-      <div class="chinese-text" id="chineseText"></div>
+      <div class="passage-meta">已扫描 · 点击任何字可跳转</div>
+      <div id="title-line" class="passage-title" style="display:none"></div>
+      <div class="chinese-text" id="chinese-text"></div>
     </div>
-    <div id="ttsWarning" class="tts-warning">
-      ⚠️ 请用 iPhone Safari 或 Android Chrome 打开，以支持中文朗读。
-    </div>
-    <div class="player-panel">
+    <div class="tts-warn" id="tts-warn">⚠️ 请用 Safari 或 Chrome 打开以支持中文朗读。</div>
+    <div class="player">
       <div class="progress-row">
-        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-        <span class="pct-label" id="pctLabel">0%</span>
+        <div class="track"><div class="fill" id="fill"></div></div>
+        <span class="pct" id="pct">0%</span>
       </div>
-      <div class="player-controls">
-        <button class="ctrl-btn" title="从头再来" onclick="restartReading()">
+      <div class="controls">
+        <button class="ctrl" onclick="restart()" title="从头">
           <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
         </button>
-        <button class="play-pause-btn" id="playPauseBtn" onclick="togglePlay()">
-          <svg id="playIcon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <button class="play-btn" id="play-btn" onclick="togglePlay()">
+          <svg id="play-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
         </button>
-        <button class="ctrl-btn" title="慢速重读" onclick="rewind()">
+        <button class="ctrl" onclick="rewind()" title="后退">
           <svg viewBox="0 0 24 24"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
         </button>
       </div>
-      <div class="speed-chips">
-        <button class="speed-chip active" onclick="setSpeed(0.5,this)">很慢 ×0.5</button>
-        <button class="speed-chip" onclick="setSpeed(0.7,this)">慢 ×0.7</button>
-        <button class="speed-chip" onclick="setSpeed(1.0,this)">正常</button>
-        <button class="speed-chip" onclick="setSpeed(1.2,this)">快 ×1.2</button>
+      <div class="speeds">
+        <button class="spd on"  onclick="setSpd(0.5,this)">很慢 ×0.5</button>
+        <button class="spd"     onclick="setSpd(0.7,this)">慢 ×0.7</button>
+        <button class="spd"     onclick="setSpd(1.0,this)">正常</button>
+        <button class="spd"     onclick="setSpd(1.2,this)">快 ×1.2</button>
       </div>
     </div>
   </div>
 </div>
 
 </div><!-- #app -->
-
 <script>
-// ─── CONFIG ──────────────────────────────────────────────────────────────────
-const GOOGLE_VISION_API_KEY = 'AIzaSyAlQi0CiHtnIwdEOqBTsdgMEM6NExHKCzM';
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+var GV_KEY = 'AIzaSyAlQi0CiHtnIwdEOqBTsdgMEM6NExHKCzM';
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
-let passage = '';
-let chars = [];           // array of {char, el, startMs, endMs}
-let isPlaying = false;
-let currentSpeed = 0.5;
-let utterance = null;
-let cameraStream = null;
-let animFrame = null;
-let speechStartTime = 0;
-let totalDurationMs = 0;
-let charTimings = [];     // [{startMs, endMs}] parallel to passage chars
-let currentHighlightIdx = -1;
-
-const PUNCT = new Set(['。','，','？','！','、','；','：','…','—','「','」','『','』','（','）',' ','\n']);
+var chars      = [];   // [{ch, el}]  all renderable characters
+var isPlaying  = false;
+var speed      = 0.5;
+var curIdx     = -1;
+var timings    = [];   // [{start, end}] ms from utterance start, parallel to chars
+var hlTimer    = null;
+var utter      = null;
+var tStart     = 0;
 
 // ─── NAVIGATION ───────────────────────────────────────────────────────────────
-function go(id) {
-  document.querySelectorAll('.screen').forEach(s => {
-    if (s.classList.contains('active')) { s.classList.add('exit'); s.classList.remove('active'); }
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(function(s) {
+    s.classList.remove('active');
   });
-  setTimeout(() => {
-    document.querySelectorAll('.screen.exit').forEach(s => s.classList.remove('exit'));
-    document.getElementById(id).classList.add('active');
-  }, 60);
+  document.getElementById(id).classList.add('active');
 }
 
-// ─── CAMERA ───────────────────────────────────────────────────────────────────
-async function openCamera() {
-  go('s-camera');
-  await new Promise(r => setTimeout(r, 300));
-  try {
-    cameraStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width:{ideal:1920}, height:{ideal:1080} }
-    });
-    document.getElementById('videoEl').srcObject = cameraStream;
-  } catch(e) {
-    alert('无法访问摄像头。请允许相机权限，或点击"从相册选择"。');
-    go('s-home');
-  }
-}
-
-function stopCamera() {
-  if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
-}
-
-function capturePhoto() {
-  const video = document.getElementById('videoEl');
-  const canvas = document.getElementById('captureCanvas');
-  canvas.width = video.videoWidth || 640;
-  canvas.height = video.videoHeight || 480;
-  canvas.getContext('2d').drawImage(video, 0, 0);
-  const dataURL = canvas.toDataURL('image/jpeg', 0.9);
-  stopCamera();
-  runOCR(dataURL);
-}
-
-function handleFileSelect(e) {
-  const file = e.target.files[0];
+// ─── FILE INPUT ───────────────────────────────────────────────────────────────
+function onFileChosen(e) {
+  var file = e.target.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => runOCR(ev.target.result);
-  reader.readAsDataURL(file);
   e.target.value = '';
+  var reader = new FileReader();
+  reader.onload = function(ev) { processImage(ev.target.result); };
+  reader.readAsDataURL(file);
 }
 
-// ─── IMAGE COMPRESSION ────────────────────────────────────────────────────────
-function compressImage(dataURL, maxSize, quality) {
-  return new Promise((resolve) => {
-    // Safety timeout — if image never loads, resolve with original after 5s
-    const timeout = setTimeout(() => {
-      console.warn('compressImage timeout, using original');
-      resolve(dataURL);
-    }, 5000);
+// ─── PROCESSING ───────────────────────────────────────────────────────────────
+function setStep(n, state) {
+  var el = document.getElementById('s' + n);
+  el.className = 'step ' + state;
+  el.querySelector('.step-icon').textContent = state === 'done' ? '✓' : String(n);
+}
 
-    const img = new Image();
-    img.onload = () => {
-      clearTimeout(timeout);
-      try {
-        let { width, height } = img;
-        if (width > maxSize || height > maxSize) {
-          if (width > height) {
-            height = Math.round(height * maxSize / width);
-            width = maxSize;
-          } else {
-            width = Math.round(width * maxSize / height);
-            height = maxSize;
-          }
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        const compressed = canvas.toDataURL('image/jpeg', quality);
-        console.log('Compressed from', Math.round(dataURL.length/1024), 'KB to', Math.round(compressed.length/1024), 'KB');
-        resolve(compressed);
-      } catch(e) {
-        console.warn('Compression failed:', e);
-        resolve(dataURL);
-      }
-    };
-    img.onerror = (e) => {
-      clearTimeout(timeout);
-      console.warn('Image load error:', e);
-      resolve(dataURL);
-    };
-    img.src = dataURL;
+function showErr(msg) {
+  document.getElementById('spinner').style.display = 'none';
+  var box = document.getElementById('err-box');
+  box.style.display = 'block';
+  box.textContent = msg;
+  document.getElementById('btn-retry').style.display = 'block';
+}
+
+function processImage(dataURL) {
+  goTo('s-proc');
+
+  // Reset processing UI
+  document.getElementById('spinner').style.display = 'block';
+  document.getElementById('err-box').style.display = 'none';
+  document.getElementById('btn-retry').style.display = 'none';
+  document.getElementById('preview').innerHTML = '<img src="' + dataURL + '" style="width:100%;height:100%;object-fit:cover;">';
+  [1,2,3,4].forEach(function(n) { setStep(n, ''); });
+
+  // Compress then OCR
+  compressImage(dataURL, 1200, 0.82, function(compressed) {
+    setStep(1, 'done');
+    setStep(2, 'active');
+    callVisionAPI(compressed);
   });
 }
 
-// ─── OCR ──────────────────────────────────────────────────────────────────────
-async function runOCR(dataURL) {
-  // Step 1 — switch to processing screen and reset UI
-  go('s-processing');
-  await delay(200); // wait for DOM to be fully visible
-
-  document.getElementById('scanPreview').innerHTML = '<img src="' + dataURL + '" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">';
-  document.getElementById('errorMsg').style.display = 'none';
-  document.getElementById('retryBtn').style.display = 'none';
-  document.getElementById('procSpinner').style.display = 'block';
-
-  ['st1','st2','st3','st4'].forEach((id, i) => {
-    const el = document.getElementById(id);
-    el.className = 'step-row';
-    el.querySelector('.step-icon').textContent = String(i + 1);
-  });
-
-  function setStep(n, state) {
-    const el = document.getElementById('st' + n);
-    el.className = 'step-row ' + state;
-    if (state === 'done') el.querySelector('.step-icon').textContent = '✓';
-  }
-
-  function showError(msg) {
-    document.getElementById('procSpinner').style.display = 'none';
-    document.getElementById('errorMsg').style.display = 'block';
-    document.getElementById('errorMsg').textContent = msg;
-    document.getElementById('retryBtn').style.display = 'block';
-  }
-
-  try {
-    // Step 2 — compress image to max 1200px before sending
-    setStep(1, 'active');
-    const compressedURL = await new Promise((resolve) => {
-      const img = new Image();
-      const timer = setTimeout(() => resolve(dataURL), 4000);
-      img.onload = () => {
-        clearTimeout(timer);
-        const MAX = 1200;
-        let w = img.width, h = img.height;
-        if (w > MAX || h > MAX) {
-          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
-          else { w = Math.round(w * MAX / h); h = MAX; }
-        }
-        const c = document.createElement('canvas');
-        c.width = w; c.height = h;
-        c.getContext('2d').drawImage(img, 0, 0, w, h);
-        resolve(c.toDataURL('image/jpeg', 0.82));
-      };
-      img.onerror = () => { clearTimeout(timer); resolve(dataURL); };
-      img.src = dataURL;
-    });
-
-    const base64 = compressedURL.split(',')[1];
-    setStep(1, 'done'); setStep(2, 'active');
-
-    // Step 3 — call Google Vision with a 15 second timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-    let response;
-    try {
-      response = await fetch(
-        'https://vision.googleapis.com/v1/images:annotate?key=' + GOOGLE_VISION_API_KEY,
-        {
-          method: 'POST',
-          signal: controller.signal,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            requests: [{
-              image: { content: base64 },
-              features: [{ type: 'TEXT_DETECTION', maxResults: 1 }],
-              imageContext: { languageHints: ['zh-Hans', 'zh-Hant'] }
-            }]
-          })
-        }
-      );
-      clearTimeout(timeoutId);
-    } catch(fetchErr) {
-      clearTimeout(timeoutId);
-      const reason = fetchErr.name === 'AbortError' ? '请求超时（15秒）。请检查网络或减小图片。' : '网络错误: ' + fetchErr.message;
-      showError(reason);
-      return;
+function compressImage(dataURL, maxPx, quality, cb) {
+  setStep(1, 'active');
+  var img = new Image();
+  var timer = setTimeout(function() { cb(dataURL); }, 5000);
+  img.onload = function() {
+    clearTimeout(timer);
+    var w = img.width, h = img.height;
+    if (w > maxPx || h > maxPx) {
+      if (w > h) { h = Math.round(h * maxPx / w); w = maxPx; }
+      else       { w = Math.round(w * maxPx / h); h = maxPx; }
     }
-
-    if (!response.ok) {
-      showError('API HTTP错误: ' + response.status + ' ' + response.statusText);
-      return;
-    }
-
-    const data = await response.json();
-    if (data.error) { showError('API错误: ' + data.error.message + ' (code ' + data.error.code + ')'); return; }
-    if (!data.responses || !data.responses[0]) { showError('API返回空响应，请重试。'); return; }
-
-    const annotation = data.responses[0].textAnnotations;
-    if (!annotation || annotation.length === 0) { showError('未能识别到文字。请确保光线充足、图片清晰。'); return; }
-
-    let extractedText = annotation[0].description.trim();
-    setStep(2, 'done'); setStep(3, 'active');
-
-    // Step 4 — clean text
-    extractedText = cleanChineseText(extractedText);
-    await delay(300);
-
-    if (!extractedText || extractedText.length === 0) {
-      showError('识别到文字，但没有找到中文字符。请拍摄包含中文的页面。');
-      return;
-    }
-
-    setStep(3, 'done'); setStep(4, 'active');
-    await delay(300);
-    setStep(4, 'done');
-    await delay(250);
-
-    go('s-read');
-    await delay(100);
-    buildPassage(extractedText);
-
-  } catch(err) {
-    showError('未知错误: ' + (err.message || String(err)));
-    console.error('runOCR error:', err);
-  }
+    var c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    c.getContext('2d').drawImage(img, 0, 0, w, h);
+    cb(c.toDataURL('image/jpeg', quality));
+  };
+  img.onerror = function() { clearTimeout(timer); cb(dataURL); };
+  img.src = dataURL;
 }
 
-function cleanChineseText(rawText) {
-  const chinesePunct = new Set(['。','，','？','！','、','；','：','…','—','「','」','『','』','（','）','·']);
+function callVisionAPI(dataURL) {
+  var base64 = dataURL.split(',')[1];
+  var controller = new AbortController();
+  var timeout = setTimeout(function() { controller.abort(); }, 20000);
 
-  function isChineseChar(ch) {
-    const code = ch.codePointAt(0);
-    return (code >= 0x4E00 && code <= 0x9FFF)
-        || (code >= 0x3400 && code <= 0x4DBF)
-        || (code >= 0x20000 && code <= 0x2A6DF)
-        || chinesePunct.has(ch);
-  }
-
-  // Step 1: Split raw OCR into lines, filter each to Chinese only
-  const lines = rawText.split(/\r?\n/).map(line =>
-    line.split('').filter(isChineseChar).join('')
-  ).filter(line => line.length > 0);
-
-  if (lines.length === 0) return '';
-
-  const sentenceEnders = new Set(['。','！','？']);
-
-  // Step 2: Separate title from body.
-  // Look through the first 3 lines for a title candidate.
-  // Title = a short line (2-8 chars) that does NOT end in sentence punctuation.
-  // If multiple candidates exist in the first 3 lines, pick the LONGEST one
-  // (e.g. "大海那边" beats "我阅读" — the actual title is usually longer than a label).
-  let titleLine = '';
-  let titleIdx = -1;
-
-  const candidates = lines.slice(0, 3).map((line, i) => ({ line, i })).filter(({ line }) =>
-    line.length >= 2 &&
-    line.length <= 8 &&
-    !sentenceEnders.has(line[line.length - 1])
-  );
-
-  if (candidates.length > 0) {
-    // Pick the longest candidate — titles are usually more descriptive than labels
-    candidates.sort((a, b) => b.line.length - a.line.length);
-    titleLine = candidates[0].line;
-    titleIdx = candidates[0].i;
-  }
-
-  // Remove ALL short non-sentence lines from the first 3 lines (labels, series names etc)
-  // keeping only the chosen title and body content
-  const shortPrefixLines = new Set(
-    lines.slice(0, 3)
-      .map((line, i) => ({ line, i }))
-      .filter(({ line }) => line.length <= 8 && !sentenceEnders.has(line[line.length - 1]))
-      .map(({ i }) => i)
-  );
-
-  let bodyLines = lines.filter((_, i) => !shortPrefixLines.has(i));
-
-  // Step 3: Filter out remaining short non-sentence lines from body
-  // (page numbers like 52, chapter labels like 第四课, series labels)
-  const filteredBody = bodyLines.filter(line => {
-    // Keep if ends with sentence punctuation — it's a real sentence even if short
-    if (sentenceEnders.has(line[line.length - 1])) return true;
-    // Keep if long enough to be body text
-    if (line.length >= 5) return true;
-    // Drop short non-sentence lines — these are labels, numbers, headers
-    return false;
+  fetch('https://vision.googleapis.com/v1/images:annotate?key=' + GV_KEY, {
+    method: 'POST',
+    signal: controller.signal,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      requests: [{
+        image: { content: base64 },
+        features: [{ type: 'TEXT_DETECTION', maxResults: 1 }],
+        imageContext: { languageHints: ['zh-Hans', 'zh-Hant'] }
+      }]
+    })
+  })
+  .then(function(r) {
+    clearTimeout(timeout);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  })
+  .then(function(data) {
+    if (data.error) throw new Error('API: ' + data.error.message + ' (' + data.error.code + ')');
+    var ann = data.responses && data.responses[0] && data.responses[0].textAnnotations;
+    if (!ann || ann.length === 0) throw new Error('未识别到文字，请确保光线充足、图片清晰。');
+    var raw = ann[0].description;
+    setStep(2, 'done');
+    setStep(3, 'active');
+    var parsed = parsePassage(raw);
+    setStep(3, 'done');
+    setStep(4, 'active');
+    setTimeout(function() {
+      setStep(4, 'done');
+      setTimeout(function() {
+        goTo('s-read');
+        buildPassage(parsed);
+      }, 250);
+    }, 300);
+  })
+  .catch(function(err) {
+    clearTimeout(timeout);
+    var msg = err.name === 'AbortError' ? '请求超时，请检查网络后重试。' : ('识别失败：' + err.message);
+    showErr(msg);
   });
-
-  // Step 4: Group body lines into paragraphs.
-  // A paragraph ends when a line ends with 。！？
-  let paragraphs = [];
-  let current = '';
-  for (const line of filteredBody) {
-    current += line;
-    if (sentenceEnders.has(line[line.length - 1])) {
-      paragraphs.push(current);
-      current = '';
-    }
-  }
-  if (current.length > 0) paragraphs.push(current);
-
-  // Step 5: Assemble final output
-  // Title gets its own line separated from passage by blank line
-  let result = '';
-  if (titleLine) result += titleLine + '\n\n';
-  result += paragraphs.join('\n\n');
-  return result.trim();
 }
 
-function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+// ─── PASSAGE PARSING ─────────────────────────────────────────────────────────
+// Keeps CJK characters AND Chinese punctuation. Everything else (pinyin, numbers, latin) dropped.
+var CJK_PUNCT = "。，？！、；：…—「」『』（）·“”‘’";
 
-// ─── BUILD PASSAGE ────────────────────────────────────────────────────────────
-function buildPassage(text) {
-  passage = text;
+function isCJK(ch) {
+  var c = ch.codePointAt(0);
+  return (c >= 0x4E00 && c <= 0x9FFF)
+      || (c >= 0x3400 && c <= 0x4DBF)
+      || (c >= 0x20000 && c <= 0x2A6DF);
+}
+
+function isKeep(ch) {
+  return isCJK(ch) || CJK_PUNCT.indexOf(ch) >= 0;
+}
+
+function parsePassage(raw) {
+  // 1. Split OCR output into lines
+  var lines = raw.split('\n');
+
+  // 2. For each line keep only Chinese chars + punctuation
+  var cleaned = [];
+  for (var i = 0; i < lines.length; i++) {
+    var out = '';
+    for (var j = 0; j < lines[i].length; j++) {
+      if (isKeep(lines[i][j])) out += lines[i][j];
+    }
+    if (out.length > 0) cleaned.push(out);
+  }
+
+  if (cleaned.length === 0) return { title: '', paras: [] };
+
+  var sentEnders = '。！？';
+
+  // 3. Title detection: scan first 3 lines for the longest short non-sentence line
+  //    Short = 2–8 chars, does not end with sentence-ending punctuation
+  //    We also strip ALL other short non-sentence prefix lines (labels, series names)
+  var titleText = '';
+  var shortPrefixIdxs = {};
+  for (var i = 0; i < Math.min(3, cleaned.length); i++) {
+    var l = cleaned[i];
+    if (l.length >= 2 && l.length <= 8 && sentEnders.indexOf(l[l.length-1]) < 0) {
+      shortPrefixIdxs[i] = true;
+      if (l.length > titleText.length) titleText = l;
+    }
+  }
+
+  // 4. Build body lines (everything not in shortPrefixIdxs)
+  //    Also drop any remaining short non-sentence lines (page numbers, chapter labels)
+  var bodyLines = [];
+  for (var i = 0; i < cleaned.length; i++) {
+    if (shortPrefixIdxs[i]) continue;
+    var l = cleaned[i];
+    // Drop short non-sentence lines in the body too (e.g. "52", "第四课")
+    if (l.length < 5 && sentEnders.indexOf(l[l.length-1]) < 0) continue;
+    bodyLines.push(l);
+  }
+
+  // 5. Group body lines into paragraphs
+  //    A paragraph closes when a line ends with 。！？
+  var paras = [];
+  var cur = '';
+  for (var i = 0; i < bodyLines.length; i++) {
+    cur += bodyLines[i];
+    if (sentEnders.indexOf(bodyLines[i][bodyLines[i].length-1]) >= 0) {
+      paras.push(cur);
+      cur = '';
+    }
+  }
+  if (cur.length > 0) paras.push(cur);
+
+  return { title: titleText, paras: paras };
+}
+
+// ─── BUILD READ-ALONG UI ──────────────────────────────────────────────────────
+function buildPassage(parsed) {
   chars = [];
-  currentHighlightIdx = -1;
+  curIdx = -1;
   isPlaying = false;
-  updatePlayIcon(false);
-  document.getElementById('progressFill').style.width = '0%';
-  document.getElementById('pctLabel').textContent = '0%';
+  setPlayIcon(false);
+  document.getElementById('fill').style.width = '0%';
+  document.getElementById('pct').textContent = '0%';
 
-  const el = document.getElementById('chineseText');
-  el.innerHTML = '';
-  text.split('').forEach((ch, i) => {
-    if (ch === '\n') {
-      // Single newline = line break within paragraph
-      el.appendChild(document.createElement('br'));
-      // Add a spacer span so the highlight loop has something to land on
-      const spacer = document.createElement('span');
-      spacer.id = 'c' + i;
-      spacer.className = 'char para-break';
-      spacer.textContent = '';
-      el.appendChild(spacer);
-      chars.push({ ch, el: spacer, idx: i });
-      return;
-    }
-    const span = document.createElement('span');
-    span.id = 'c' + i;
-    span.className = 'char';
-    span.textContent = ch;
-    span.onclick = () => seekTo(i);
-    el.appendChild(span);
-    chars.push({ ch, el: span, idx: i });
+  // Title
+  var titleEl = document.getElementById('title-line');
+  titleEl.innerHTML = '';
+  if (parsed.title) {
+    titleEl.style.display = 'block';
+    parsed.title.split('').forEach(function(ch) {
+      var sp = document.createElement('span');
+      sp.className = 'char';
+      sp.textContent = ch;
+      var idx = chars.length;
+      sp.onclick = function() { seekTo(idx); };
+      titleEl.appendChild(sp);
+      chars.push({ ch: ch, el: sp });
+    });
+  } else {
+    titleEl.style.display = 'none';
+  }
+
+  // Body paragraphs
+  var bodyEl = document.getElementById('chinese-text');
+  bodyEl.innerHTML = '';
+  parsed.paras.forEach(function(paraText) {
+    var div = document.createElement('div');
+    div.className = 'para';
+    paraText.split('').forEach(function(ch) {
+      var sp = document.createElement('span');
+      sp.className = 'char';
+      sp.textContent = ch;
+      var idx = chars.length;
+      sp.onclick = function() { seekTo(idx); };
+      div.appendChild(sp);
+      chars.push({ ch: ch, el: sp });
+    });
+    bodyEl.appendChild(div);
   });
 }
 
 // ─── PLAYBACK ─────────────────────────────────────────────────────────────────
-function togglePlay() {
-  if (isPlaying) { pauseAll(); return; }
-  // If at end, restart
-  if (currentHighlightIdx >= chars.length - 1) restartReading();
-  else startSpeaking(currentHighlightIdx < 0 ? 0 : currentHighlightIdx);
-}
+// Build per-character timing estimates.
+// Durations tuned so pauses at punctuation sound natural.
+var PAUSE = {
+  '。': 580, '！': 580, '？': 580,  // sentence end — full breath
+  '，': 300, '；': 300, '：': 300,  // clause pause
+  '、': 180,                         // list comma
+  '…': 420, '—': 350,               // ellipsis / dash
+  '"': 80,  '"': 80,                 // quotes — brief
+  '\u2018': 80, '\u2019': 80
+};
+var CHAR_MS = 175; // ms per regular character at rate=1.0
 
-function startSpeaking(fromCharIdx) {
-  if (!window.speechSynthesis) {
-    document.getElementById('ttsWarning').style.display = 'block';
-    return;
-  }
-  cancelSpeech();
-  isPlaying = true;
-  updatePlayIcon(true);
-
-  // Build the text slice from fromCharIdx
-  const textSlice = chars.slice(fromCharIdx).map(c => c.ch).join('');
-
-  utterance = new SpeechSynthesisUtterance(textSlice);
-  utterance.lang = 'zh-CN';
-  utterance.rate = currentSpeed;
-  utterance.pitch = 1.05;
-
-  // Best available Chinese voice
-  const voices = window.speechSynthesis.getVoices();
-  const voice = voices.find(v => v.lang === 'zh-CN' && v.localService)
-             || voices.find(v => v.lang === 'zh-CN')
-             || voices.find(v => v.lang.startsWith('zh'));
-  if (voice) utterance.voice = voice;
-
-  // ── Key fix: use boundary events for accurate sync ──
-  // boundary fires with e.charIndex = position in the utterance string
-  utterance.onboundary = function(e) {
-    if (e.name !== 'word' && e.name !== 'sentence' && e.name !== 'char') {
-      // Some browsers fire with name='word', charIndex into the string
-      return;
-    }
-  };
-
-  // We use a different approach: track elapsed time vs estimated char durations
-  // This works across all browsers including iOS Safari which ignores boundary events
-  utterance.onstart = function() {
-    speechStartTime = performance.now();
-    // Estimate total duration based on character count and rate
-    // ~180ms per Chinese character at rate=1.0, adjusted for rate
-    totalDurationMs = estimateDuration(textSlice, currentSpeed);
-    charTimings = buildCharTimings(textSlice, currentSpeed);
-    runHighlightLoop(fromCharIdx);
-  };
-
-  utterance.onend = function() {
-    cancelAnimationFrame(animFrame);
-    // Mark all remaining as read
-    chars.forEach((c,i) => {
-      if (i >= fromCharIdx) { c.el.classList.remove('highlighted'); c.el.classList.add('read'); }
-    });
-    document.getElementById('progressFill').style.width = '100%';
-    document.getElementById('pctLabel').textContent = '100%';
-    isPlaying = false;
-    currentHighlightIdx = chars.length - 1;
-    updatePlayIcon(false);
-  };
-
-  utterance.onerror = function(e) {
-    if (e.error === 'interrupted' || e.error === 'canceled') return;
-    document.getElementById('ttsWarning').style.display = 'block';
-    isPlaying = false;
-    updatePlayIcon(false);
-  };
-
-  window.speechSynthesis.speak(utterance);
-}
-
-function estimateDuration(text, rate) {
-  let ms = 0;
-  for (const ch of text) {
-    if (ch === '\n') ms += 900;
-    else if (['。','！','？'].includes(ch)) ms += 600;
-    else if (['，','；','：'].includes(ch)) ms += 320;
-    else if (['、'].includes(ch)) ms += 200;
-    else if (['…','—'].includes(ch)) ms += 400;
-    else ms += 175;
-  }
-  return ms / rate;
-}
-
-function buildCharTimings(text, rate) {
-  // Returns array of {startMs, endMs} for each character.
-  // Pauses are tuned to make reading feel natural and not robotic:
-  //   。！？  — full stop, long breath pause
-  //   ，；：  — comma pause, shorter
-  //   、      — list comma, brief
-  //   \n      — paragraph break, longest pause
-  const timings = [];
-  let cursor = 0;
-  for (const ch of text) {
-    let dur;
-    if (ch === '\n') {
-      dur = 900;  // paragraph break — long pause, no highlight
-    } else if (['。','！','？'].includes(ch)) {
-      dur = 600;  // sentence end — full breath
-    } else if (['，','；','：'].includes(ch)) {
-      dur = 320;  // clause pause
-    } else if (['、'].includes(ch)) {
-      dur = 200;  // list comma
-    } else if (['…','—'].includes(ch)) {
-      dur = 400;  // ellipsis / dash
-    } else {
-      dur = 175;  // regular character
-    }
-    dur = dur / rate;
-    timings.push({ startMs: cursor, endMs: cursor + dur });
+function buildTimings(fromIdx) {
+  var t = [];
+  var cursor = 0;
+  for (var i = fromIdx; i < chars.length; i++) {
+    var ch = chars[i].ch;
+    var dur = (PAUSE[ch] !== undefined ? PAUSE[ch] : CHAR_MS) / speed;
+    t.push({ start: cursor, end: cursor + dur });
     cursor += dur;
   }
-  return timings;
+  return t;
 }
 
-function runHighlightLoop(fromCharIdx) {
-  cancelAnimationFrame(animFrame);
-  const totalChars = chars.length;
+function speak(fromIdx) {
+  if (!window.speechSynthesis) {
+    document.getElementById('tts-warn').style.display = 'block';
+    return;
+  }
+  window.speechSynthesis.cancel();
+  var text = chars.slice(fromIdx).map(function(c) { return c.ch; }).join('');
+  utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'zh-CN';
+  utter.rate = speed;
+  utter.pitch = 1.05;
+  var voices = window.speechSynthesis.getVoices();
+  var v = voices.find(function(v) { return v.lang === 'zh-CN' && v.localService; })
+       || voices.find(function(v) { return v.lang === 'zh-CN'; })
+       || voices.find(function(v) { return v.lang.startsWith('zh'); });
+  if (v) utter.voice = v;
 
+  timings = buildTimings(fromIdx);
+  utter.onstart = function() {
+    tStart = performance.now();
+    runHL(fromIdx);
+  };
+  utter.onend = function() {
+    cancelAnimationFrame(hlTimer);
+    chars.forEach(function(c) { c.el.classList.remove('hl'); c.el.classList.add('read'); });
+    document.getElementById('fill').style.width = '100%';
+    document.getElementById('pct').textContent = '100%';
+    isPlaying = false;
+    setPlayIcon(false);
+  };
+  utter.onerror = function(e) {
+    if (e.error === 'interrupted' || e.error === 'canceled') return;
+    document.getElementById('tts-warn').style.display = 'block';
+    isPlaying = false; setPlayIcon(false);
+  };
+  window.speechSynthesis.speak(utter);
+}
+
+function runHL(fromIdx) {
+  cancelAnimationFrame(hlTimer);
+  var total = chars.length;
   function tick() {
-    const elapsed = performance.now() - speechStartTime;
-    // Find which char in the slice we're at
-    let sliceIdx = 0;
-    for (let i = 0; i < charTimings.length; i++) {
-      if (elapsed >= charTimings[i].startMs) sliceIdx = i;
+    var elapsed = performance.now() - tStart;
+    var sliceIdx = 0;
+    for (var i = 0; i < timings.length; i++) {
+      if (elapsed >= timings[i].start) sliceIdx = i;
       else break;
     }
-    const absoluteIdx = fromCharIdx + sliceIdx;
-
-    if (absoluteIdx !== currentHighlightIdx) {
-      // Clear old highlight
-      if (currentHighlightIdx >= 0 && currentHighlightIdx < chars.length) {
-        chars[currentHighlightIdx].el.classList.remove('highlighted');
-        chars[currentHighlightIdx].el.classList.add('read');
+    var absIdx = fromIdx + sliceIdx;
+    if (absIdx !== curIdx) {
+      if (curIdx >= 0) { chars[curIdx].el.classList.remove('hl'); chars[curIdx].el.classList.add('read'); }
+      for (var i = fromIdx; i < absIdx; i++) {
+        chars[i].el.classList.remove('hl'); chars[i].el.classList.add('read');
       }
-      // Mark everything before as read (catch-up)
-      for (let i = fromCharIdx; i < absoluteIdx; i++) {
-        if (i >= 0 && i < chars.length) {
-          chars[i].el.classList.remove('highlighted');
-          chars[i].el.classList.add('read');
-        }
+      if (absIdx < chars.length) {
+        chars[absIdx].el.classList.remove('read'); chars[absIdx].el.classList.add('hl');
+        chars[absIdx].el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       }
-      // Highlight current
-      if (absoluteIdx >= 0 && absoluteIdx < chars.length) {
-        chars[absoluteIdx].el.classList.remove('read');
-        chars[absoluteIdx].el.classList.add('highlighted');
-        // Auto-scroll to keep highlighted char visible
-        chars[absoluteIdx].el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      }
-      currentHighlightIdx = absoluteIdx;
-
-      // Update progress
-      const pct = Math.round(((absoluteIdx + 1) / totalChars) * 100);
-      document.getElementById('progressFill').style.width = pct + '%';
-      document.getElementById('pctLabel').textContent = pct + '%';
+      curIdx = absIdx;
+      var pct = Math.round(((absIdx + 1) / total) * 100);
+      document.getElementById('fill').style.width = pct + '%';
+      document.getElementById('pct').textContent = pct + '%';
     }
-
-    if (isPlaying) animFrame = requestAnimationFrame(tick);
+    if (isPlaying) hlTimer = requestAnimationFrame(tick);
   }
-
-  animFrame = requestAnimationFrame(tick);
+  hlTimer = requestAnimationFrame(tick);
 }
 
-function pauseAll() {
+function togglePlay() {
+  if (isPlaying) { pause(); return; }
+  if (curIdx >= chars.length - 1) { restart(); return; }
+  isPlaying = true;
+  setPlayIcon(true);
+  speak(Math.max(0, curIdx < 0 ? 0 : curIdx));
+}
+
+function pause() {
   isPlaying = false;
-  updatePlayIcon(false);
-  cancelAnimationFrame(animFrame);
-  if (window.speechSynthesis) window.speechSynthesis.pause();
+  setPlayIcon(false);
+  cancelAnimationFrame(hlTimer);
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
 }
 
 function stopAll() {
   isPlaying = false;
-  updatePlayIcon(false);
-  cancelAnimationFrame(animFrame);
-  cancelSpeech();
-}
-
-function cancelSpeech() {
+  setPlayIcon(false);
+  cancelAnimationFrame(hlTimer);
   if (window.speechSynthesis) window.speechSynthesis.cancel();
 }
 
-function restartReading() {
+function restart() {
   stopAll();
-  currentHighlightIdx = -1;
-  chars.forEach(c => c.el.classList.remove('highlighted','read'));
-  document.getElementById('progressFill').style.width = '0%';
-  document.getElementById('pctLabel').textContent = '0%';
-  setTimeout(() => startSpeaking(0), 100);
-}
-
-function seekTo(charIdx) {
-  stopAll();
-  currentHighlightIdx = charIdx - 1;
-  chars.forEach((c, i) => {
-    c.el.classList.remove('highlighted','read');
-    if (i < charIdx) c.el.classList.add('read');
-  });
-  const pct = Math.round((charIdx / chars.length) * 100);
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('pctLabel').textContent = pct + '%';
-  setTimeout(() => startSpeaking(charIdx), 100);
+  curIdx = -1;
+  chars.forEach(function(c) { c.el.classList.remove('hl', 'read'); });
+  document.getElementById('fill').style.width = '0%';
+  document.getElementById('pct').textContent = '0%';
+  setTimeout(function() { isPlaying = true; setPlayIcon(true); speak(0); }, 80);
 }
 
 function rewind() {
-  const newIdx = Math.max(0, (currentHighlightIdx || 0) - 8);
-  seekTo(newIdx);
+  var to = Math.max(0, (curIdx < 0 ? 0 : curIdx) - 10);
+  seekTo(to);
 }
 
-function setSpeed(s, btn) {
-  currentSpeed = s;
-  document.querySelectorAll('.speed-chip').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  if (isPlaying) {
-    const resumeFrom = Math.max(0, currentHighlightIdx);
-    stopAll();
-    setTimeout(() => startSpeaking(resumeFrom), 100);
-  }
+function seekTo(idx) {
+  stopAll();
+  curIdx = idx - 1;
+  chars.forEach(function(c, i) {
+    c.el.classList.remove('hl', 'read');
+    if (i < idx) c.el.classList.add('read');
+  });
+  var pct = Math.round((idx / chars.length) * 100);
+  document.getElementById('fill').style.width = pct + '%';
+  document.getElementById('pct').textContent = pct + '%';
+  setTimeout(function() { isPlaying = true; setPlayIcon(true); speak(idx); }, 80);
 }
 
-function updatePlayIcon(playing) {
-  const icon = document.getElementById('playIcon');
-  icon.innerHTML = playing
+function setSpd(s, btn) {
+  speed = s;
+  document.querySelectorAll('.spd').forEach(function(b) { b.classList.remove('on'); });
+  btn.classList.add('on');
+  if (isPlaying) { var from = Math.max(0, curIdx); stopAll(); setTimeout(function() { isPlaying = true; setPlayIcon(true); speak(from); }, 80); }
+}
+
+function setPlayIcon(playing) {
+  document.getElementById('play-icon').innerHTML = playing
     ? '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>'
     : '<polygon points="5 3 19 12 5 21 5 3"/>';
 }
 
-// Init voices
+// Pre-load voices
 if (window.speechSynthesis) {
   window.speechSynthesis.getVoices();
-  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = function() { window.speechSynthesis.getVoices(); };
 }
 
-// Prevent iOS scroll bounce outside scroll areas
-document.addEventListener('touchmove', e => {
+// Prevent scroll-bounce outside scroll areas on iOS
+document.addEventListener('touchmove', function(e) {
   if (!e.target.closest('.passage-wrap')) e.preventDefault();
 }, { passive: false });
 </script>
